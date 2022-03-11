@@ -6,7 +6,7 @@
 #define OK        0
 #define EMPTY    -1
 #define FULL     -2
-#define OVERFLOW -3
+#define OVERFLOW1 -3
 
 double stack[STACK_SIZE];
 // indeks na który wstawiam nowy element, ostatni element na [top - 1]
@@ -15,7 +15,7 @@ int top = 0;
 int stack_push(double x) {
     if (top == STACK_SIZE) {
         printf("OVERFLOW ");
-        return OVERFLOW;
+        return OVERFLOW1;
     }
     stack[top++] = x;
     return OK;
@@ -43,7 +43,7 @@ int queue[QUEUE_SIZE];
 // in - ilość osób w kolejce, curr_nr - nr bieżącego klienta
 int in = 0, curr_nr = 0;
 
-// ONE OVERFLOW for many resigning
+// ONE OVERFLOW1 for many resigning
 
 void queue_push(int in_nr) {
     for (int i = 0; i < in_nr; ++i) {
