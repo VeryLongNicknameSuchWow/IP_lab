@@ -54,9 +54,6 @@ void init_ht(hash_table *p_table, int size, DataFp dump_data, DataFp free_data,
     p_table->size = size;
     p_table->no_elements = 0;
     p_table->ht = safe_malloc(size * sizeof(ht_element *));
-//    for (int i = 0; i < size; ++i) {
-//        p_table->ht[i] = NULL;
-//    }
     memset(p_table->ht, 0, size * sizeof(ht_element *));
     p_table->dump_data = dump_data;
     p_table->free_data = free_data;
@@ -103,7 +100,26 @@ int hash_base(int k, int size) {
 }
 
 void rehash(hash_table *p_table) {
-
+    ht_element *elements[p_table->no_elements];
+    int j = 0;
+    for (int i = 0; i < p_table->size; ++i) {
+        ht_element *current = p_table->ht[i];
+        p_table->ht[i] = NULL;
+        while (current != NULL) {
+            elements[j++] = current;
+            current = current->next;
+        }
+    }
+    for (int i = 0; i < p_table->no_elements; ++i) {
+        elements[i]->next = NULL;
+    }
+    p_table->size *= 2;
+    for (int i = 0; i < p_table->no_elements; ++i) {
+        ht_element *element = elements[i];
+        int hash = p_table->hash_function(element->data, p_table->size);
+        element->next = p_table->ht[hash];
+        p_table->ht[hash] = element;
+    }
 }
 
 // find element; return pointer to previous
@@ -139,7 +155,9 @@ void insert_element(hash_table *p_table, data_union *data) {
     newElement->data = *data;
     newElement->next = p_table->ht[hash];
     p_table->ht[hash] = newElement;
-    p_table->no_elements++;
+    if (++p_table->no_elements / p_table->size >= MAX_RATE) {
+        rehash(p_table);
+    }
 }
 
 // remove element
@@ -282,6 +300,10 @@ void stream_to_ht(hash_table *p_table, FILE *stream) {
         }
         char *word = strtok(buffer, delim);
         while (word != NULL) {
+            int len = (int) strlen(word);
+            for (int i = 0; i < len; ++i) {
+                word[i] = (char) tolower(word[i]);
+            }
             dataUnion = create_data_word(word);
             ht_element *element = get_element(p_table, &dataUnion);
             if (element != NULL) {
