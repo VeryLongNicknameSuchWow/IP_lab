@@ -104,7 +104,6 @@ void rehash(hash_table *p_table) {
     int j = 0;
     for (int i = 0; i < p_table->size; ++i) {
         ht_element *current = p_table->ht[i];
-        p_table->ht[i] = NULL;
         while (current != NULL) {
             elements[j++] = current;
             current = current->next;
@@ -114,6 +113,10 @@ void rehash(hash_table *p_table) {
         elements[i]->next = NULL;
     }
     p_table->size *= 2;
+    p_table->ht = realloc(p_table->ht, p_table->size * sizeof(ht_element *));
+    for (int i = 0; i < p_table->size; ++i) {
+        p_table->ht[i] = NULL;
+    }
     for (int i = 0; i < p_table->no_elements; ++i) {
         ht_element *element = elements[i];
         int hash = p_table->hash_function(element->data, p_table->size);
@@ -150,6 +153,9 @@ ht_element *get_element(hash_table *p_table, data_union *data) {
 
 // insert element
 void insert_element(hash_table *p_table, data_union *data) {
+    if (get_element(p_table, data) != NULL) {
+        return;
+    }
     int hash = p_table->hash_function(*data, p_table->size);
     ht_element *newElement = safe_malloc(sizeof(ht_element));
     newElement->data = *data;
