@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(PI___lab C)
+project(PI_lab C)
 
 # standard C 11
 set(CMAKE_C_STANDARD 11)
